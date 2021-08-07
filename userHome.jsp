@@ -74,24 +74,19 @@
 </body>
 <script type="text/javascript" id="demoscript">
 window.addEventListener('hashchange', function(){
-    console.log('location changed!');
 	toggle_div();
 })
 	function toggle_div() {
 		hash = (window.location.hash.slice(2));
-		console.log(hash);
 		var ancestor = document.getElementById('content');
 		descendents = ancestor.children;
-		console.log(descendents);
 		for (i = 0; i < descendents.length; ++i) {
 			e = descendents[i];
-			console.log(e);
 			e.style.display = "none";
 			if (!hash || hash.length === 0 ) {
 				document.getElementById('home').style.display="block";
 			}
 			else if (e.id == hash) {
-				console.log(e.id);
 				e.style.display ="block";
 			}
 		}
