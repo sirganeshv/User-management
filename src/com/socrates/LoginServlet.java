@@ -1,3 +1,5 @@
+package com.socrates;
+
 import javax.servlet.http.*;
 import javax.servlet.*;  
 import java.io.*;
@@ -5,9 +7,6 @@ import java.sql.*;
 
 
 public class LoginServlet extends HttpServlet {
-
-	private static final String SERLVET = "/hello";
-	private static final String SERLVET_ONE = "/disp";
 
 	public Connection getConnection() throws Exception {
 		String dbDriver = "com.mysql.jdbc.Driver";
@@ -17,24 +16,23 @@ public class LoginServlet extends HttpServlet {
 		String dbUsername = "root";
 		String dbPassword = "";
 		Class.forName(dbDriver);
-		Connection con = DriverManager.getConnection(dbURL + dbName,
+		return DriverManager.getConnection(dbURL + dbName,
 				dbUsername,
 				dbPassword);
-		return con;
 	}
 
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {
+			throws IOException {
 		String path = req.getServletPath();
 		res.setContentType("text/html");//setting the content type
 		PrintWriter pw = res.getWriter();//get the stream to write the data
 		switch (path) {
-			case "/register": {
+			case "/register" : {
+				String fullName = req.getParameter("name");
+				String username = req.getParameter("username");
+				String password = req.getParameter("password");
+				String email = req.getParameter("email");
 				try {
-					String fullName = req.getParameter("name");
-					String username = req.getParameter("username");
-					String password = req.getParameter("password");
-					String email = req.getParameter("email");
 					Connection con = getConnection();
 					PreparedStatement st = con.prepareStatement("insert into login (user_name, password) values(?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
@@ -44,7 +42,7 @@ public class LoginServlet extends HttpServlet {
 					ResultSet rs = st.getGeneratedKeys();
 					rs.next();
 					int userID = rs.getInt(1);
-					pw.println("Your username is "+username);
+					pw.println("Your username is " + username);
 					st.close();
 					st = con.prepareStatement("insert into users values(?, ?, ?)");
 					st.setInt(1, userID);
@@ -62,11 +60,11 @@ public class LoginServlet extends HttpServlet {
 				}
 			}
 			break;
-			case "/login": {
+			case "/login" : {
 				try {
 					String username = req.getParameter("username");
 					String password = req.getParameter("password");
-					String userFromDB = null;
+					String userFromDB;
 					String passwordFromDB = null;
 					int userID = 0;
 					Connection connection = getConnection();
@@ -75,11 +73,9 @@ public class LoginServlet extends HttpServlet {
 						ResultSet rs = stmt.executeQuery(query);
 						while (rs.next()) {
 							userFromDB = rs.getString("user_name");
-							if (!userFromDB.equals(username.trim())) {
-								continue;
-							} else {
+							if (userFromDB.equals(username.trim())) {
 								passwordFromDB = rs.getString("password");
-								userID=rs.getInt("user_id");
+								userID = rs.getInt("user_id");
 								break;
 							}
 						}
@@ -87,15 +83,15 @@ public class LoginServlet extends HttpServlet {
 					if (passwordFromDB != null && passwordFromDB.equals(password)) {
 						String name;
 						String email;
-						String userQuery = "select * from users where user_id = "+userID;
+						String userQuery = "select * from users where user_id = " + userID;
 						try (Statement stmt = connection.createStatement()) {
 							ResultSet rs = stmt.executeQuery(userQuery);
 							if (rs.next()) {
 								name = rs.getString("name");
 								email = rs.getString("email");
-								req.setAttribute("name",name);
-								req.setAttribute("email",email);
-								req.setAttribute("user_id",userID);
+								req.setAttribute("name", name);
+								req.setAttribute("email", email);
+								req.setAttribute("user_id", userID);
 							}
 						}
 						connection.close();
@@ -110,8 +106,7 @@ public class LoginServlet extends HttpServlet {
 					ex.printStackTrace();
 				}
 			}
-
-			//}
+			break;
 		}
 	}
 }
