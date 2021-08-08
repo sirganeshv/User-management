@@ -8,7 +8,7 @@ import java.sql.*;
 
 public class UserManagementServlet extends HttpServlet {
 
-	public Connection getConnection() throws Exception {
+	public Connection getConnection() throws SQLException, ClassNotFoundException {
 		String dbDriver = "com.mysql.jdbc.Driver";
 		String dbURL = "jdbc:mysql://localhost:3306/";
 		// Database name to access
@@ -21,8 +21,7 @@ public class UserManagementServlet extends HttpServlet {
 				dbPassword);
 	}
 
-	public void doPost(HttpServletRequest req, HttpServletResponse res)
-			throws IOException {
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		String path = req.getServletPath();
 		res.setContentType("text/html");//setting the content type
 		PrintWriter pw = res.getWriter();//get the stream to write the data
@@ -63,6 +62,7 @@ public class UserManagementServlet extends HttpServlet {
 			break;
 			case "/login" : {
 				try {
+					//Get the request parameters
 					String username = req.getParameter("username");
 					String password = req.getParameter("password");
 					String userFromDB;
@@ -73,8 +73,10 @@ public class UserManagementServlet extends HttpServlet {
 					try (Statement stmt = connection.createStatement()) {
 						ResultSet rs = stmt.executeQuery(query);
 						while (rs.next()) {
+							// Find if username is present in DB
 							userFromDB = rs.getString("user_name");
 							if (userFromDB.equals(username.trim())) {
+								// If the user is present, fetch password from DB
 								passwordFromDB = rs.getString("password");
 								userID = rs.getInt("user_id");
 								break;
@@ -82,6 +84,7 @@ public class UserManagementServlet extends HttpServlet {
 						}
 					}
 					if (passwordFromDB != null && passwordFromDB.equals(password)) {
+						// If password is matched, set the user details in attribute& forward the request to Home page
 						String name;
 						String email;
 						String userQuery = "select * from users where user_id = " + userID;
@@ -97,7 +100,7 @@ public class UserManagementServlet extends HttpServlet {
 						}
 						connection.close();
 						RequestDispatcher dispatcher = req.getRequestDispatcher("/userHome");
-						dispatcher.forward(req, res);
+						dispatcher.forward(req, res); // Forward the request to Home page
 					} else {
 						pw.println("Invalid credentials<br/><br/><input type=\"button\" Value=\"Back to login page\" onclick=\"location.href = 'index.jsp';\" />");
 						pw.close();
