@@ -6,11 +6,11 @@ import java.io.*;
 import java.sql.*;
 
 
-public class LoginServlet extends HttpServlet {
+public class UserManagementServlet extends HttpServlet {
 
 	public Connection getConnection() throws Exception {
 		String dbDriver = "com.mysql.jdbc.Driver";
-		String dbURL = "jdbc:mysql:// localhost:3306/";
+		String dbURL = "jdbc:mysql://localhost:3306/";
 		// Database name to access
 		String dbName = "socrates";
 		String dbUsername = "root";
@@ -28,27 +28,28 @@ public class LoginServlet extends HttpServlet {
 		PrintWriter pw = res.getWriter();//get the stream to write the data
 		switch (path) {
 			case "/register" : {
+				//Get the request parameters
 				String fullName = req.getParameter("name");
 				String username = req.getParameter("username");
 				String password = req.getParameter("password");
 				String email = req.getParameter("email");
 				try {
 					Connection con = getConnection();
-					PreparedStatement st = con.prepareStatement("insert into login (user_name, password) values(?, ?)",
+					PreparedStatement stmt = con.prepareStatement("insert into login (user_name, password) values(?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
-					st.setString(1, username);
-					st.setString(2, password);
-					st.executeUpdate();
-					ResultSet rs = st.getGeneratedKeys();
+					stmt.setString(1, username);
+					stmt.setString(2, password);
+					stmt.executeUpdate(); //Insert the credential data into DB
+					ResultSet rs = stmt.getGeneratedKeys();
 					rs.next();
-					int userID = rs.getInt(1);
+					int userID = rs.getInt(1); // Get the userID (Auto-incremented value)
 					pw.println("Your username is " + username);
-					st.close();
-					st = con.prepareStatement("insert into users values(?, ?, ?)");
-					st.setInt(1, userID);
-					st.setString(2, fullName);
-					st.setString(3, email);
-					st.executeUpdate();
+					stmt.close();
+					stmt = con.prepareStatement("insert into users values(?, ?, ?)");
+					stmt.setInt(1, userID);
+					stmt.setString(2, fullName);
+					stmt.setString(3, email);
+					stmt.executeUpdate(); // Insert the user data
 					con.close();
 					pw.println("<br>Successfully Registered<br/><br/><input type=\"button\" Value=\"Back to login\" onclick=\"location.href = 'index.jsp';\" />");
 					pw.close();

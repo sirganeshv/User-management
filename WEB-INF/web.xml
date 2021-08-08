@@ -12,7 +12,7 @@
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>com.socrates.LoginServlet</servlet-class>
+        <servlet-class>com.socrates.UserManagementServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -42,7 +42,7 @@
 	
 	<servlet>
         <servlet-name>RegistrationServlet</servlet-name>
-        <servlet-class>com.socrates.LoginServlet</servlet-class>
+        <servlet-class>com.socrates.UserManagementServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
