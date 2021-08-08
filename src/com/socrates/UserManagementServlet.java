@@ -21,64 +21,64 @@ public class UserManagementServlet extends HttpServlet {
 				dbPassword);
 	}
 
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		String path = req.getServletPath();
-		res.setContentType("text/html");//setting the content type
-		PrintWriter pw = res.getWriter();//get the stream to write the data
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String path = request.getServletPath();
+		response.setContentType("text/html");//setting the content type
+		PrintWriter printWriter = response.getWriter();//get the stream to write the data
 		switch (path) {
 			case "/register" : {
 				//Get the request parameters
-				String fullName = req.getParameter("name");
-				String username = req.getParameter("username");
-				String password = req.getParameter("password");
-				String email = req.getParameter("email");
+				String fullName = request.getParameter("name");
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+				String email = request.getParameter("email");
 				try {
-					Connection con = getConnection();
-					PreparedStatement stmt = con.prepareStatement("insert into login (user_name, password) values(?, ?)",
+					Connection connection = getConnection();
+					PreparedStatement statement = connection.prepareStatement("insert into login (user_name, password) values(?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
-					stmt.setString(1, username);
-					stmt.setString(2, password);
-					stmt.executeUpdate(); //Insert the credential data into DB
-					ResultSet rs = stmt.getGeneratedKeys();
-					rs.next();
-					int userID = rs.getInt(1); // Get the userID (Auto-incremented value)
-					pw.println("Your username is " + username);
-					stmt.close();
-					stmt = con.prepareStatement("insert into users values(?, ?, ?)");
-					stmt.setInt(1, userID);
-					stmt.setString(2, fullName);
-					stmt.setString(3, email);
-					stmt.executeUpdate(); // Insert the user data
-					con.close();
-					pw.println("<br>Successfully Registered<br/><br/><input type=\"button\" Value=\"Back to login\" onclick=\"location.href = 'index.jsp';\" />");
-					pw.close();
+					statement.setString(1, username);
+					statement.setString(2, password);
+					statement.executeUpdate(); //Insert the credential data into DB
+					ResultSet resultSet = statement.getGeneratedKeys();
+					resultSet.next();
+					int userID = resultSet.getInt(1); // Get the userID (Auto-incremented value)
+					printWriter.println("Your username is " + username);
+					statement.close();
+					statement = connection.prepareStatement("insert into users values(?, ?, ?)");
+					statement.setInt(1, userID);
+					statement.setString(2, fullName);
+					statement.setString(3, email);
+					statement.executeUpdate(); // Insert the user data
+					connection.close();
+					printWriter.println("<br>Successfully Registered<br/><br/><input type=\"button\" Value=\"Back to login\" onclick=\"location.href = 'index.jsp';\" />");
+					printWriter.close();
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					pw.println("Error while registering...Try with another userID<br/><br/><input type=\"button\" Value=\"Back to Registration page\" onclick=\"location.href = 'registration';\" />");
-					pw.close();
+					printWriter.println("Error while registering...Try with another userID<br/><br/><input type=\"button\" Value=\"Back to Registration page\" onclick=\"location.href = 'registration';\" />");
+					printWriter.close();
 				}
 			}
 			break;
 			case "/login" : {
 				try {
 					//Get the request parameters
-					String username = req.getParameter("username");
-					String password = req.getParameter("password");
+					String username = request.getParameter("username");
+					String password = request.getParameter("password");
 					String userFromDB;
 					String passwordFromDB = null;
 					int userID = 0;
 					Connection connection = getConnection();
 					String query = "select * from login";
-					try (Statement stmt = connection.createStatement()) {
-						ResultSet rs = stmt.executeQuery(query);
-						while (rs.next()) {
+					try (Statement statement = connection.createStatement()) {
+						ResultSet resultSet = statement.executeQuery(query);
+						while (resultSet.next()) {
 							// Find if username is present in DB
-							userFromDB = rs.getString("user_name");
+							userFromDB = resultSet.getString("user_name");
 							if (userFromDB.equals(username.trim())) {
 								// If the user is present, fetch password from DB
-								passwordFromDB = rs.getString("password");
-								userID = rs.getInt("user_id");
+								passwordFromDB = resultSet.getString("password");
+								userID = resultSet.getInt("user_id");
 								break;
 							}
 						}
@@ -88,22 +88,22 @@ public class UserManagementServlet extends HttpServlet {
 						String name;
 						String email;
 						String userQuery = "select * from users where user_id = " + userID;
-						try (Statement stmt = connection.createStatement()) {
-							ResultSet rs = stmt.executeQuery(userQuery);
-							if (rs.next()) {
-								name = rs.getString("name");
-								email = rs.getString("email");
-								req.setAttribute("name", name);
-								req.setAttribute("email", email);
-								req.setAttribute("user_id", userID);
+						try (Statement statement = connection.createStatement()) {
+							ResultSet resultSet = statement.executeQuery(userQuery);
+							if (resultSet.next()) {
+								name = resultSet.getString("name");
+								email = resultSet.getString("email");
+								request.setAttribute("name", name);
+								request.setAttribute("email", email);
+								request.setAttribute("user_id", userID);
 							}
 						}
 						connection.close();
-						RequestDispatcher dispatcher = req.getRequestDispatcher("/userHome");
-						dispatcher.forward(req, res); // Forward the request to Home page
+						RequestDispatcher dispatcher = request.getRequestDispatcher("/userHome");
+						dispatcher.forward(request, response); // Forward the request to Home page
 					} else {
-						pw.println("Invalid credentials<br/><br/><input type=\"button\" Value=\"Back to login page\" onclick=\"location.href = 'index.jsp';\" />");
-						pw.close();
+						printWriter.println("Invalid credentials<br/><br/><input type=\"button\" Value=\"Back to login page\" onclick=\"location.href = 'index.jsp';\" />");
+						printWriter.close();
 						connection.close();
 					}
 				} catch (Exception ex) {
