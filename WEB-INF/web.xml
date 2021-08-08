@@ -34,6 +34,16 @@
 		<servlet-name>userRegistration</servlet-name>  
 		<jsp-file>/registration.jsp</jsp-file>  
 	</servlet>  
+	
+	<servlet-mapping>  
+		<servlet-name>errorPage</servlet-name>  
+		<url-pattern>/error</url-pattern>  
+	</servlet-mapping>  
+	
+	<servlet>  
+		<servlet-name>errorPage</servlet-name>  
+		<jsp-file>/ErrorPage.jsp</jsp-file>  
+	</servlet>  
 
 	<servlet-mapping>  
 		<servlet-name>userRegistration</servlet-name>  

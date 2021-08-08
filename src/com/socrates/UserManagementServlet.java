@@ -24,7 +24,6 @@ public class UserManagementServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String path = request.getServletPath();
 		response.setContentType("text/html");//setting the content type
-		PrintWriter printWriter = response.getWriter();//get the stream to write the data
 		switch (path) {
 			case "/register" : {
 				//Get the request parameters
@@ -33,6 +32,7 @@ public class UserManagementServlet extends HttpServlet {
 				String password = request.getParameter("password");
 				String email = request.getParameter("email");
 				try {
+					PrintWriter printWriter = response.getWriter();//get the stream to write the data
 					Connection connection = getConnection();
 					PreparedStatement statement = connection.prepareStatement("insert into login (user_name, password) values(?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
@@ -55,8 +55,14 @@ public class UserManagementServlet extends HttpServlet {
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					printWriter.println("Error while registering...Try with another userID<br/><br/><input type=\"button\" Value=\"Back to Registration page\" onclick=\"location.href = 'registration';\" />");
-					printWriter.close();
+					try {
+						RequestDispatcher dispatcher = request.getRequestDispatcher("/error");
+						request.setAttribute("errorMessage", "Error while registering...Try with another userID");
+						dispatcher.forward(request, response); // Forward the request to Home page
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			break;
@@ -102,8 +108,9 @@ public class UserManagementServlet extends HttpServlet {
 						RequestDispatcher dispatcher = request.getRequestDispatcher("/userHome");
 						dispatcher.forward(request, response); // Forward the request to Home page
 					} else {
-						printWriter.println("Invalid credentials<br/><br/><input type=\"button\" Value=\"Back to login page\" onclick=\"location.href = 'index.jsp';\" />");
-						printWriter.close();
+						RequestDispatcher dispatcher = request.getRequestDispatcher("/error");
+						request.setAttribute("errorMessage", "Invalid credentials");
+						dispatcher.forward(request, response); // Forward the request to Home page
 						connection.close();
 					}
 				} catch (Exception ex) {
